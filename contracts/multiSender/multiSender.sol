@@ -11,13 +11,17 @@ contract multiSender {
 
     function sendERC20(
         address token,
-        address receiver,
-        uint256 amount
-    ) public virtual returns (uint256) {
+        address[] memory receiver,
+        uint256[] memory amount
+    ) public virtual returns (bool) {
         IERC20 erc20Contract = IERC20(token);
-        erc20Contract.transferFrom(msg.sender, receiver, amount);
-        uint256 balance = erc20Contract.balanceOf(receiver);
-        console.log("balance:", balance);
-        return balance;
+        require(receiver.length <= 100, "receiver list is overload! please give a list smaller than 100");
+        require(receiver.length == amount.length, "lacking of amount infomation, please check again!");
+        //TODO: REQUIRE TOTAL AMOUNT
+        for (uint256 j = 0; j < receiver.length; j++) {
+            erc20Contract.transferFrom(msg.sender, receiver[j], amount[j]);
+        }
+
+        return true;
     }
 }

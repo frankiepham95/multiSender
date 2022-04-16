@@ -49,13 +49,17 @@ contract('ERC20', function () {
     //change signer to tokenOwner
     erc20Contract = await erc20Contract.connect(tokenOwner);
     //approve transfer
-    await erc20Contract.approve(multiSenderContract.address, 3333);
+    await erc20Contract.approve(multiSenderContract.address, 5555);
   });
 
   it('test get balance by contract', async function () {
     //send by tokenOwner
     console.log('balance of receiver:');
     multiSenderContract = multiSenderContract.connect(tokenOwner);
-    await multiSenderContract.sendERC20(erc20Contract.address, tokenReceiver_1.address, 3333);
+    let receiver = [tokenReceiver_1.address, tokenReceiver_1.address];
+    let amountArray = [1111, 2233];
+    await multiSenderContract.sendERC20(erc20Contract.address, receiver, amountArray);
+    let finalBalance = await erc20Contract.balanceOf(tokenReceiver_1.address);
+    console.log('finalBalance', finalBalance);
   });
 });
