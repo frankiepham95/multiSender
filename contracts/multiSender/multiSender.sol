@@ -3,9 +3,18 @@
 
 pragma solidity ^0.8.0;
 
-import "../token/ERC20/IERC20.sol" as ERC20;
+import "../token/ERC20/IERC20.sol";
 import "hardhat/console.sol";
 
-// contract multiSender {
-//     function sendERC20(address[] memory receiver, uint256[] memory amount) public virtual {}
-// }
+contract multiSender {
+    constructor() {}
+
+    function sendERC20(address token) public virtual returns (uint256) {
+        console.log("hello");
+        // IERC20 erc20Contract = IERC20(token);
+        // uint256 balance = erc20Contract.balanceOf(msg.sender);
+        // console.log("balance: ", balance);
+        // return balance;
+        return 123;
+    }
+}
