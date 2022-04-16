@@ -8,6 +8,7 @@
 
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config();
 const argv = require('yargs/yargs')()
   .env('')
   .options({
@@ -27,7 +28,7 @@ const argv = require('yargs/yargs')()
     mode: {
       alias: 'compileMode',
       type: 'string',
-      choices: [ 'production', 'development' ],
+      choices: ['production', 'development'],
       default: 'development',
     },
     compiler: {
@@ -39,10 +40,22 @@ const argv = require('yargs/yargs')()
       alias: 'coinmarketcapApiKey',
       type: 'string',
     },
-  })
-  .argv;
+  }).argv;
 
 require('@nomiclabs/hardhat-truffle5');
+require('@nomiclabs/hardhat-waffle');
+require('dotenv').config();
+require('@nomiclabs/hardhat-etherscan');
+
+// This is a sample Hardhat task. To learn how to create your own go to
+// https://hardhat.org/guides/create-task.html
+task('accounts', 'Prints the list of accounts', async (taskArgs, hre) => {
+  const accounts = await hre.ethers.getSigners();
+
+  for (const account of accounts) {
+    console.log(account.address);
+  }
+});
 
 if (argv.enableGasReport) {
   require('hardhat-gas-reporter');
@@ -72,11 +85,20 @@ module.exports = {
       blockGasLimit: 10000000,
       allowUnlimitedContractSize: !withOptimizations,
     },
+    rinkeby: {
+      url: process.env.RINKEBY_PRC,
+      accounts: [process.env.PRIVATE_KEY],
+    },
   },
   gasReporter: {
     currency: 'USD',
     outputFile: argv.ci ? 'gas-report.txt' : undefined,
     coinmarketcap: argv.coinmarketcap,
+  },
+  etherscan: {
+    // Your API key for Etherscan
+    // Obtain one at https://etherscan.io/
+    apiKey: process.env.API_KEY,
   },
 };
 
