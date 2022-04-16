@@ -23,6 +23,8 @@ contract('ERC20', function () {
 
     erc20ContractOwner = signers[2];
 
+    multiSenderOnwer = signers[3];
+
     //deploy erc20 contract
     let erc20MintableFactory = await ethers.getContractFactory('ERC20Mintable', erc20ContractOwner);
 
@@ -31,7 +33,7 @@ contract('ERC20', function () {
 
     erc20Contract.connect();
     //get and deploy multiSender contract
-    let multiSenderFactory = await ethers.getContractFactory('multiSender', tokenOwner);
+    let multiSenderFactory = await ethers.getContractFactory('multiSender', multiSenderOnwer);
     multiSenderContract = await multiSenderFactory.deploy();
     await multiSenderContract.deployed();
   });
@@ -44,11 +46,16 @@ contract('ERC20', function () {
   });
 
   it('approve for transfer', async function () {
-    // erc20Contract;
-    // await erc20Contract.mint(tokenOwner.address, 9999);
+    //change signer to tokenOwner
     erc20Contract = await erc20Contract.connect(tokenOwner);
-    await erc20Contract.transfer(tokenReceiver_1.address, 333);
-    let balance = await erc20Contract.balanceOf(tokenOwner.address);
-    console.log("tokenOwner's balance: ", balance);
+    //approve transfer
+    await erc20Contract.approve(multiSenderContract.address, 3333);
+  });
+
+  it('test get balance by contract', async function () {
+    //send by tokenOwner
+    console.log('balance of receiver:');
+    multiSenderContract = multiSenderContract.connect(tokenOwner);
+    await multiSenderContract.sendERC20(erc20Contract.address, tokenReceiver_1.address, 3333);
   });
 });

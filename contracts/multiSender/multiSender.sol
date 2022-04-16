@@ -9,12 +9,15 @@ import "hardhat/console.sol";
 contract multiSender {
     constructor() {}
 
-    function sendERC20(address token) public virtual returns (uint256) {
-        console.log("hello");
-        // IERC20 erc20Contract = IERC20(token);
-        // uint256 balance = erc20Contract.balanceOf(msg.sender);
-        // console.log("balance: ", balance);
-        // return balance;
-        return 123;
+    function sendERC20(
+        address token,
+        address receiver,
+        uint256 amount
+    ) public virtual returns (uint256) {
+        IERC20 erc20Contract = IERC20(token);
+        erc20Contract.transferFrom(msg.sender, receiver, amount);
+        uint256 balance = erc20Contract.balanceOf(receiver);
+        console.log("balance:", balance);
+        return balance;
     }
 }
