@@ -1,5 +1,5 @@
-##File Path
+## File Path
 
-contract path: `./contracts/multiSender/multisender.sol`
+> **Contract path:** `./contracts/multiSender/multisender.sol`
 
-test file: `./test/multiSender/multiSender.test.js`
+> **Test file:** `./test/multiSender/multiSender.test.js`
