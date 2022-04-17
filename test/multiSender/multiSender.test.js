@@ -6,7 +6,7 @@ const { starknet, network, ethers } = require('hardhat');
 const { expect } = require('chai');
 const { clearConfigCache } = require('prettier');
 
-contract('ERC20', function () {
+contract('multiSender', function () {
   let tokenOwner;
   let tokenReceiver_1;
   let erc20_erc721_contractOwner;
