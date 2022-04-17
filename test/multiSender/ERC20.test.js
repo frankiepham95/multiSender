@@ -62,4 +62,30 @@ contract('ERC20', function () {
     let finalBalance = await erc20Contract.balanceOf(tokenReceiver_1.address);
     console.log('finalBalance', finalBalance);
   });
+
+  it('test send ether', async function () {
+    //send by tokenOwner
+
+    multiSenderContract = multiSenderContract.connect(tokenOwner);
+    let receiver = [tokenReceiver_1.address, tokenReceiver_1.address];
+    let balanceBefore = await tokenOwner.getBalance();
+    let balanceReceiverBefore = await tokenReceiver_1.getBalance();
+    console.log('>>>>> balance of tokenowner before send: ', balanceBefore);
+    let amountArray = [10000, 10000];
+    let gas = await multiSenderContract.estimateGas.sendEther(receiver, amountArray, { value: BigNumber.from(30000) });
+    let gasPrice = await multiSenderContract.provider.getGasPrice();
+    let gasFee = gas * gasPrice;
+    console.log('estimateGasFee:  ', gasFee);
+    let a = await multiSenderContract.sendEther(receiver, amountArray, { value: BigNumber.from(30000), gasLimit: gas });
+    console.log('real gas fee', a);
+    let balanceAfter = await tokenOwner.getBalance();
+    let balanceReceiverAfter = await tokenReceiver_1.getBalance();
+    let receiverIncrease = balanceReceiverAfter.sub(balanceReceiverBefore);
+    console.log('>>>>> balance of tokenowner after send: ', balanceAfter);
+
+    let spendWie = balanceBefore.sub(balanceAfter);
+
+    console.log('>>>>> spent: ', spendWie);
+    console.log('receiverIncrease: ', receiverIncrease);
+  });
 });
