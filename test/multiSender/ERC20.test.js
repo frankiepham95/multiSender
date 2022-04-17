@@ -57,7 +57,7 @@ contract('ERC20', function () {
     console.log('balance of receiver:');
     multiSenderContract = multiSenderContract.connect(tokenOwner);
     let receiver = [tokenReceiver_1.address, tokenReceiver_1.address];
-    let amountArray = [1111, 2233];
+    let amountArray = [1111, 2231];
     await multiSenderContract.sendERC20(erc20Contract.address, receiver, amountArray);
     let finalBalance = await erc20Contract.balanceOf(tokenReceiver_1.address);
     console.log('finalBalance', finalBalance);
