@@ -23,7 +23,6 @@ contract multiSender {
         IERC20 erc20Contract = IERC20(token);
         require(_receiver.length <= 100, "receiver list is overload! please give a list smaller than 100");
         require(_receiver.length == _amount.length, "lacking of amount infomation, please check again!");
-        //TODO: REQUIRE TOTAL AMOUNT
         for (uint256 j = 0; j < _receiver.length; j++) {
             erc20Contract.transferFrom(msg.sender, _receiver[j], _amount[j]);
             totalSend += _amount[j];
