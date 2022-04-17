@@ -4,6 +4,7 @@
 pragma solidity ^0.8.0;
 
 import "../token/ERC20/IERC20.sol";
+import "../token/ERC721/IERC721.sol";
 import "hardhat/console.sol";
 
 contract multiSender {
@@ -38,6 +39,22 @@ contract multiSender {
             require(success, "Transfer failed.");
         }
 
+        return true;
+    }
+
+    function sendERC721(
+        address token,
+        address[] memory _receiver,
+        uint256[] memory _tokenID
+    ) public virtual returns (bool) {
+        IERC721 erc721Contract = IERC721(token);
+        require(_receiver.length <= 100, "receiver list is overload! please give a list smaller than 100");
+        require(_receiver.length == _tokenID.length, "lacking of amount infomation, please check again!");
+        //TODO: REQUIRE TOTAL AMOUNT
+        for (uint256 j = 0; j < _receiver.length; j++) {
+            erc721Contract.transferFrom(msg.sender, _receiver[j], _tokenID[j]);
+        }
+        // emit Multisended(totalSend, token);
         return true;
     }
 }

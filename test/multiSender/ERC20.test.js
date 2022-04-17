@@ -9,10 +9,11 @@ const { clearConfigCache } = require('prettier');
 contract('ERC20', function () {
   let tokenOwner;
   let tokenReceiver_1;
-  let erc20ContractOwner;
+  let erc20_erc721_contractOwner;
 
   let multiSenderContract;
   let erc20Contract;
+  let erc721Contract;
 
   before(async function () {
     const signers = await ethers.getSigners();
@@ -21,12 +22,12 @@ contract('ERC20', function () {
 
     tokenReceiver_1 = signers[1];
 
-    erc20ContractOwner = signers[2];
+    erc20_erc721_contractOwner = signers[2];
 
     multiSenderOnwer = signers[3];
 
     //deploy erc20 contract
-    let erc20MintableFactory = await ethers.getContractFactory('ERC20Mintable', erc20ContractOwner);
+    let erc20MintableFactory = await ethers.getContractFactory('ERC20Mintable', erc20_erc721_contractOwner);
 
     erc20Contract = await erc20MintableFactory.deploy();
     await erc20Contract.deployed();
@@ -36,13 +37,29 @@ contract('ERC20', function () {
     let multiSenderFactory = await ethers.getContractFactory('multiSender', multiSenderOnwer);
     multiSenderContract = await multiSenderFactory.deploy();
     await multiSenderContract.deployed();
+
+    //get and deploy multiSender contract
+    let erc721Factory = await ethers.getContractFactory('ERC721MintableBurnable', erc20_erc721_contractOwner);
+    erc721Contract = await erc721Factory.deploy('NFT', 'TNFT');
+    await erc721Contract.deployed();
   });
 
   it('mint', async function () {
-    console.log('minting NFT');
+    console.log('minting erc20');
     await erc20Contract.mint(tokenOwner.address, 9999);
     let balance = await erc20Contract.balanceOf(tokenOwner.address);
     console.log("tokenOwner's balance: ", balance);
+  });
+
+  it('mint NFT', async function () {
+    console.log('minting NFT');
+    for (let index = 0; index < 100; index++) {
+      await erc721Contract.mint(tokenOwner.address, index, 'Qmb6tWBDLd9j2oSnvSNhE314WFL7SRpQNtfwjFWsStXp5A');
+    }
+    let balance = await erc721Contract.balanceOf(tokenOwner.address);
+    console.log("tokenOwner's NFT balance: ", balance);
+    // let uri = await erc721Contract.tokenURI(index);
+    // console.log('uri: ', uri);
   });
 
   it('approve for transfer', async function () {
@@ -76,8 +93,7 @@ contract('ERC20', function () {
     let gasPrice = await multiSenderContract.provider.getGasPrice();
     let gasFee = gas * gasPrice;
     console.log('estimateGasFee:  ', gasFee);
-    let a = await multiSenderContract.sendEther(receiver, amountArray, { value: BigNumber.from(30000), gasLimit: gas });
-    console.log('real gas fee', a);
+    await multiSenderContract.sendEther(receiver, amountArray, { value: BigNumber.from(30000), gasLimit: gas });
     let balanceAfter = await tokenOwner.getBalance();
     let balanceReceiverAfter = await tokenReceiver_1.getBalance();
     let receiverIncrease = balanceReceiverAfter.sub(balanceReceiverBefore);
@@ -87,5 +103,41 @@ contract('ERC20', function () {
 
     console.log('>>>>> spent: ', spendWie);
     console.log('receiverIncrease: ', receiverIncrease);
+  });
+
+  it('approve for transfer NFT', async function () {
+    //change signer to tokenOwner
+    erc721Contract = await erc721Contract.connect(tokenOwner);
+    //approve transfer
+    await erc721Contract.setApprovalForAll(multiSenderContract.address, true);
+  });
+
+  it('transfer NFT', async function () {
+    //send by tokenOwner
+    console.log('balance of receiver:');
+    multiSenderContract = multiSenderContract.connect(tokenOwner);
+    let receivers = [tokenReceiver_1.address, tokenReceiver_1.address];
+    let tokenIds = [1, 3];
+    await multiSenderContract.sendERC721(erc721Contract.address, receivers, tokenIds);
+    let finalBalance = await erc721Contract.balanceOf(tokenReceiver_1.address);
+    console.log('finalBalance', finalBalance);
+  });
+
+  it('remove operator', async function () {
+    //change signer to tokenOwner
+    erc721Contract = await erc721Contract.connect(tokenOwner);
+    //approve transfer
+    await erc721Contract.setApprovalForAll(multiSenderContract.address, false);
+  });
+
+  it('transfer NFT 1,3 after remove operater', async function () {
+    //send by tokenOwner
+    console.log('balance of receiver:');
+    multiSenderContract = multiSenderContract.connect(tokenOwner);
+    let receivers = [tokenReceiver_1.address, tokenReceiver_1.address];
+    let tokenIds = [1, 3];
+    try {
+      await multiSenderContract.sendERC721(erc721Contract.address, receivers, tokenIds);
+    } catch (error) {}
   });
 });
